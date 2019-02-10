@@ -31,13 +31,16 @@
 #include "imgui_impl_vulkan.h"
 #include <stdio.h>
 
+
+
+
 // Vulkan data
 static const VkAllocationCallbacks* g_Allocator = NULL;
 static VkPhysicalDevice             g_PhysicalDevice = VK_NULL_HANDLE;
-static VkInstance                   g_Instance = VK_NULL_HANDLE;
+///static VkInstance                   g_Instance = VK_NULL_HANDLE;
 static VkDevice                     g_Device = VK_NULL_HANDLE;
-static uint32_t                     g_QueueFamily = (uint32_t)-1;
-static VkQueue                      g_Queue = VK_NULL_HANDLE;
+///static uint32_t                     g_QueueFamily = (uint32_t)-1;
+///static VkQueue                      g_Queue = VK_NULL_HANDLE;
 static VkPipelineCache              g_PipelineCache = VK_NULL_HANDLE;
 static VkDescriptorPool             g_DescriptorPool = VK_NULL_HANDLE;
 static VkRenderPass                 g_RenderPass = VK_NULL_HANDLE;
@@ -699,18 +702,18 @@ bool    ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info, VkRenderPass rend
     ImGuiIO& io = ImGui::GetIO();
     io.BackendRendererName = "imgui_impl_vulkan";
 
-    IM_ASSERT(info->Instance != VK_NULL_HANDLE);
+    ///IM_ASSERT(info->Instance != VK_NULL_HANDLE);
     IM_ASSERT(info->PhysicalDevice != VK_NULL_HANDLE);
     IM_ASSERT(info->Device != VK_NULL_HANDLE);
-    IM_ASSERT(info->Queue != VK_NULL_HANDLE);
+    ///IM_ASSERT(info->Queue != VK_NULL_HANDLE);
     IM_ASSERT(info->DescriptorPool != VK_NULL_HANDLE);
     IM_ASSERT(render_pass != VK_NULL_HANDLE);
 
-    g_Instance = info->Instance;
+    ///g_Instance = info->Instance;
     g_PhysicalDevice = info->PhysicalDevice;
     g_Device = info->Device;
-    g_QueueFamily = info->QueueFamily;
-    g_Queue = info->Queue;
+    ///g_QueueFamily = info->QueueFamily;
+    ///g_Queue = info->Queue;
     g_RenderPass = render_pass;
     g_PipelineCache = info->PipelineCache;
     g_DescriptorPool = info->DescriptorPool;

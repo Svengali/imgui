@@ -15,15 +15,19 @@
 #define IMGUI_VULKAN_DEBUG_REPORT
 #endif
 
-static VkAllocationCallbacks*       g_Allocator = NULL;
-static VkInstance                   g_Instance = VK_NULL_HANDLE;
-static VkPhysicalDevice             g_PhysicalDevice = VK_NULL_HANDLE;
-static VkDevice                     g_Device = VK_NULL_HANDLE;
-static uint32_t                     g_QueueFamily = (uint32_t)-1;
-static VkQueue                      g_Queue = VK_NULL_HANDLE;
-static VkDebugReportCallbackEXT     g_DebugReport = VK_NULL_HANDLE;
-static VkPipelineCache              g_PipelineCache = VK_NULL_HANDLE;
-static VkDescriptorPool             g_DescriptorPool = VK_NULL_HANDLE;
+namespace ig
+{
+    static VkAllocationCallbacks* g_Allocator = NULL;
+    static VkInstance                   g_Instance = VK_NULL_HANDLE;
+    static VkPhysicalDevice             g_PhysicalDevice = VK_NULL_HANDLE;
+    static VkDevice                     g_Device = VK_NULL_HANDLE;
+    static uint32_t                     g_QueueFamily = (uint32_t)-1;
+    static VkQueue                      g_Queue = VK_NULL_HANDLE;
+    static VkDebugReportCallbackEXT     g_DebugReport = VK_NULL_HANDLE;
+    static VkPipelineCache              g_PipelineCache = VK_NULL_HANDLE;
+    static VkDescriptorPool             g_DescriptorPool = VK_NULL_HANDLE;
+}
+
 
 static ImGui_ImplVulkanH_WindowData g_WindowData;
 
@@ -173,13 +177,33 @@ static void SetupVulkan(const char** extensions, uint32_t extensions_count)
     }
 }
 
-static void SetupVulkanWindowData(ImGui_ImplVulkanH_WindowData* wd, VkSurfaceKHR surface, int width, int height)
+static void SetupVulkanWindowData(ImGui_ImplVulkanH_WindowData* wd, VkDevice dev, VkPhysicalDevice devPhysical, VkSurfaceKHR surface, int width, int height)
 {
     wd->Surface = surface;
 
+
+    uint32_t                     queueFamily = (uint32_t)-1;
+
+    // Select graphics queue family
+    {
+        uint32_t count;
+        vkGetPhysicalDeviceQueueFamilyProperties( devPhysical, &count, NULL );
+        VkQueueFamilyProperties* queues = (VkQueueFamilyProperties*)malloc( sizeof( VkQueueFamilyProperties ) * count );
+        vkGetPhysicalDeviceQueueFamilyProperties( devPhysical, &count, queues );
+        for( uint32_t i = 0; i < count; i++ )
+            if( queues[i].queueFlags& VK_QUEUE_GRAPHICS_BIT )
+            {
+                queueFamily = i;
+                break;
+            }
+        free( queues );
+        IM_ASSERT( g_QueueFamily != -1 );
+    }
+
+
     // Check for WSI support
     VkBool32 res;
-    vkGetPhysicalDeviceSurfaceSupportKHR(g_PhysicalDevice, g_QueueFamily, wd->Surface, &res);
+    vkGetPhysicalDeviceSurfaceSupportKHR( devPhysical, queueFamily, wd->Surface, &res);
     if (res != VK_TRUE)
     {
         fprintf(stderr, "Error no WSI support on physical device 0\n");
@@ -189,7 +213,7 @@ static void SetupVulkanWindowData(ImGui_ImplVulkanH_WindowData* wd, VkSurfaceKHR
     // Select Surface Format
     const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
     const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-    wd->SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(g_PhysicalDevice, wd->Surface, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
+    wd->SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat( devPhysical, wd->Surface, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
 
     // Select Present Mode
 #ifdef IMGUI_UNLIMITED_FRAME_RATE
@@ -197,12 +221,12 @@ static void SetupVulkanWindowData(ImGui_ImplVulkanH_WindowData* wd, VkSurfaceKHR
 #else
     VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_FIFO_KHR };
 #endif
-    wd->PresentMode = ImGui_ImplVulkanH_SelectPresentMode(g_PhysicalDevice, wd->Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
+    wd->PresentMode = ImGui_ImplVulkanH_SelectPresentMode( devPhysical, wd->Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
     //printf("[vulkan] Selected PresentMode = %d\n", wd->PresentMode);
 
     // Create SwapChain, RenderPass, Framebuffer, etc.
-    ImGui_ImplVulkanH_CreateWindowDataCommandBuffers(g_PhysicalDevice, g_Device, g_QueueFamily, wd, g_Allocator);
-    ImGui_ImplVulkanH_CreateWindowDataSwapChainAndFramebuffer(g_PhysicalDevice, g_Device, wd, g_Allocator, width, height);
+    ImGui_ImplVulkanH_CreateWindowDataCommandBuffers( devPhysical, dev, queueFamily, wd, g_Allocator);
+    ImGui_ImplVulkanH_CreateWindowDataSwapChainAndFramebuffer( devPhysical, dev, wd, g_Allocator, width, height);
 }
 
 static void CleanupVulkan()
