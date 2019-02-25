@@ -707,7 +707,7 @@ bool    ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info, VkRenderPass rend
     IM_ASSERT(info->Device != VK_NULL_HANDLE);
     ///IM_ASSERT(info->Queue != VK_NULL_HANDLE);
     IM_ASSERT(info->DescriptorPool != VK_NULL_HANDLE);
-    IM_ASSERT(render_pass != VK_NULL_HANDLE);
+    //IM_ASSERT(render_pass != VK_NULL_HANDLE);
 
     ///g_Instance = info->Instance;
     g_PhysicalDevice = info->PhysicalDevice;
