@@ -2376,8 +2376,34 @@ void ImGui::RenderFrame(ImVec2 p_min, ImVec2 p_max, ImU32 fill_col, bool border,
     const float border_size = g.Style.FrameBorderSize;
     if (border && border_size > 0.0f)
     {
-        window->DrawList->AddRect(p_min+ImVec2(1,1), p_max+ImVec2(1,1), GetColorU32(ImGuiCol_BorderShadow), rounding, ImDrawCornerFlags_All, border_size);
-        window->DrawList->AddRect(p_min, p_max, GetColorU32(ImGuiCol_Border), rounding, ImDrawCornerFlags_All, border_size);
+        //window->DrawList->AddRect(p_min+ImVec2(1,1), p_max+ImVec2(1,1), GetColorU32(ImGuiCol_BorderShadow), rounding, ImDrawCornerFlags_All, border_size);
+
+        const ImVec4 baseBorder = GetStyleColorVec4(ImGuiCol_Border);
+
+        const auto vLeftTop = baseBorder * ImVec4( 1.5f, 1.5f, 1.5f, 1.0f );
+        const auto vRiteBot = baseBorder * ImVec4( 0.5f, 0.5f, 0.5f, 1.0f );
+
+        const auto leftTop = GetColorU32( vLeftTop );
+        const auto riteBot = GetColorU32( vRiteBot );
+
+        //const auto u32 = GetColorU32(  );
+
+        /*
+        PathLineTo( p_min );
+        PathLineTo( ImVec2( p_max.x, p_min.y ) );
+        PathLineTo( p_max );
+        PathLineTo( ImVec2( p_min.x, p_max.y ) );
+        */
+
+        window->DrawList->AddLine( ImVec2( p_min.x, p_max.y ), p_min, leftTop );
+        window->DrawList->AddLine( p_min, ImVec2( p_max.x, p_min.y ), leftTop );
+
+        window->DrawList->AddLine( ImVec2( p_max.x, p_min.y ), p_max, riteBot );
+        window->DrawList->AddLine( p_max, ImVec2( p_min.x, p_max.y ), riteBot );
+
+
+
+        //window->DrawList->AddRect(p_min, p_max, GetColorU32(ImGuiCol_Border), rounding, ImDrawCornerFlags_All, border_size);
     }
 }
 
